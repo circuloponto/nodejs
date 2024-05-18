@@ -1,90 +1,134 @@
+const { User } = require("../models/users.model");
+const { validationResult } = require("express-validator");
+const bcrypt = require("bcrypt");
 
-const { User } = require('../models/users.model');
-
-
-
+/**
+ * User signUP function
+ * @param {*} req username,email
+ * @param {*} res success || error
+ * @returns 200 || 400
+ */
 exports.userSignup = async (req, res) => {
   try {
-
-
     const data = {
       username: "nano",
-      email: "email@gmail.com"
-    }
+      email: "email@gmail.com",
+    };
     const saveuser = await User.create(data);
     if (!saveuser) {
       return res.status(400).json({
         message: "Couldn't create the user",
-        status: 400
-      })
+        status: 400,
+      });
     }
-
     return res.status(200).json({
       message: "user is created",
       status: 200,
-      data: saveuser
-    })
+      data: saveuser,
+    });
   } catch (error) {
-    console.log("🚀 ~ exports.userSignup=async ~ error:", error)
+    console.log("🚀 ~ exports.userSignup=async ~ error:", error);
     return res.status(500).json({
       status: 500,
       message: error.message,
-    })
+    });
   }
-}
+};
+
+exports.loginUser = async (req, res) => {
+  try {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const errorMessage = errors.array()[0].msg;
+      return res.status(STATUS_CODE.UNPROCESSABLE_ENTITY).json({
+        success: false,
+        status: STATUS_CODE.UNPROCESSABLE_ENTITY,
+        message: errorMessage,
+      });
+    }
+    const { email, password } = req.body;
+    const findUser = await User.findOne({ email });
+    if (!findUser) {
+      return res.status(403).json({
+        success: false,
+        status: 403,
+        message: "User not found with the provided email",
+      });
+    }
+    const passComp = await authenticateUser(password, findUser.password);
+    if (!passComp) {
+      return res.status(403).json({
+        success: false,
+        status: 403,
+        message: "Invalid creditionals",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      status: 200,
+      message: "User login successfull",
+      data: findUser,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      status: 500,
+      message: error.message,
+    });
+  }
+};
 
 exports.updateUser = async (req, res) => {
   try {
     const { id, name } = req.body;
-    const findUser = await User.findByIdAndUpdate({ _id: new ObjectId(id) }, { $set: { username: name } }, { new: true });
-    return res.send(findUser)
+    const findUser = await User.findByIdAndUpdate(
+      { _id: new ObjectId(id) },
+      { $set: { username: name } },
+      { new: true }
+    );
+    return res.send(findUser);
   } catch (error) {
-    console.log("🚀 ~ exports.updateUser= ~ error:", error)
-
+    console.log("🚀 ~ exports.updateUser= ~ error:", error);
   }
-}
+};
 
 exports.deleteUserById = async (req, res) => {
   try {
-    const { id, email } = req.body;
-    const deleteUser = await User.deleteOne({ _id: id })
+    const { id, useremail } = req.body;
+    const deleteUser = await User.findByIdAndDelete({ _id: id });
     //const deleteUser = await User.findById()
-    return res.send(deleteUser)
+    return res.send(deleteUser);
   } catch (error) {
-    console.log("🚀 ~ exports.deleteUser= ~ error:", error)
-
+    console.log("🚀 ~ exports.deleteUser= ~ error:", error);
   }
-}
+};
 exports.deleteUserByEmail = async (req, res) => {
   try {
     const { email } = req.body;
-    const deleteUser = await User.deleteOne({ email: email })
-    return res.send(deleteUser)
+    const deleteUser = await User.deleteOne({ email: email });
+    return res.send(deleteUser);
   } catch (error) {
-    console.log("🚀 ~ exports.deleteUserByEmail= ~ error:", error)
-
+    console.log("🚀 ~ exports.deleteUserByEmail= ~ error:", error);
   }
-}
+};
 exports.findOneUserByEmail = async (req, res) => {
   try {
     const { email } = req.body.email;
     const user = await User.findOne({ email });
-    return res.send(user)
+    return res.send(user);
   } catch (error) {
-    console.log("🚀 ~ exports.findOneUserByEmail= ~ error:", error)
-
+    console.log("🚀 ~ exports.findOneUserByEmail= ~ error:", error);
   }
-}
+};
 exports.findOneUserById = async (req, res) => {
   try {
     const { id } = req.body.id;
-    const user = await User.findOne({ id });
-    return res.send(user)
+    const user = await User.findById({ _id: id });
+    return res.send(user);
   } catch (error) {
-    console.log("🚀 ~ exports.findOneUserByEmail= ~ error:", error)
-
+    console.log("🚀 ~ exports.findOneUserByEmail= ~ error:", error);
   }
-}
+};
 exports.updateEmailById = async (req, res) => {
   try {
     const { id, email } = req.body;
@@ -93,75 +137,63 @@ exports.updateEmailById = async (req, res) => {
       { email: email }, // Update the email field
       { new: true } // Option to return the updated document
     );
-    return res.send(updatedUser)
+    return res.send(updatedUser);
   } catch (error) {
-    console.log("🚀 ~ exports.updateEmailById= ~ error:", error)
-
+    console.log("🚀 ~ exports.updateEmailById= ~ error:", error);
   }
-}
+};
 exports.updateEmailByEmail = async (req, res) => {
   try {
-    const { id, email, newEmail } = req.body;
-    const updatedUser = await User.findOneAndUpdate(
-      { email: email }, // Filter to find the user by current email
-      { email: newEmail }, // Update the email field
-      { new: true } // Option to return the updated document
-    );
+    const { id, email, newEmail, isActive } = req.body;
+    const updatedUser = await User.findOneAndUpdate({ _id: id, $and: [{ isActive: true }] });
+    // { email: email }, // Filter to find the user by current email
+    // { email: newEmail }, // Update the email field
+    // { new: true } // Option to return the updated document
 
-    return res.send(updatedUser)
+    return res.send(updatedUser);
   } catch (error) {
-    console.log("🚀 ~ exports.updateEmailById= ~ error:", error)
-
+    console.log("🚀 ~ exports.updateEmailById= ~ error:", error);
   }
-}
+};
 exports.findAllUsers = async (req, res) => {
   try {
-
     const users = await User.find();
 
-    return res.send(users)
+    return res.send(users);
   } catch (error) {
-    console.log("🚀 ~ exports.findAllUsers= ~ error:", error)
-
+    console.log("🚀 ~ exports.findAllUsers= ~ error:", error);
   }
-}
+};
 
 async function createUser(username, password, email) {
   const newUser = new User({
     username,
     password,
-    email
+    email,
   });
 
   try {
     const savedUser = await newUser.save();
-    console.log('User created successfully:', savedUser);
+    console.log("User created successfully:", savedUser);
   } catch (err) {
-    console.error('Error creating user:', err);
+    console.error("Error creating user:", err);
   }
 }
-createUser('João', '123456', 'joão@gmail.com');
+createUser("João", "123456", "joão@gmail.com");
 
-async function authenticateUser(username, password) {
+async function authenticateUser(password, hash) {
   try {
-    const user = await User.findOne({ username });
-
-    if (!user) {
-      console.log('Authentication failed. User not found.');
-      return;
-    }
-
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await bcrypt.compare(password, hash);
 
     if (isMatch) {
-      console.log('Authentication successful');
+      console.log("Authentication successful");
     } else {
-      console.log('Authentication failed. Wrong password.');
+      console.log("Authentication failed. Wrong password.");
     }
   } catch (err) {
-    console.error('Error authenticating user:', err);
+    console.error("Error authenticating user:", err);
   }
 }
 
 // Example usage
-authenticateUser('João', '123456');
+authenticateUser("João", "123456");

@@ -1,35 +1,39 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 var SALT_WORK_FACTOR = 10;
-const UsersSchema = new Schema({
-  username: {
-    type: String,
-    default: ""
-  },
-  password: {
-    type: String,
-    default: '',
-  },
-  email:
+const UsersSchema = new Schema(
   {
-    type: String,
-    default: ''
+    username: {
+      type: String,
+      default: "",
+    },
+    password: {
+      type: String,
+      default: "",
+    },
+    email: {
+      type: String,
+      default: "",
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+      enum: [true, false],
+    },
   },
-
-
-}, {
-  timestamps: true,
-  versionKey: false
-});
-
+  {
+    timestamps: true,
+    versionKey: false,
+  }
+);
 
 // Pre-save hook to hash the password
-UsersSchema.pre('save', async function (next) {
+UsersSchema.pre("save", async function (next) {
   const user = this;
 
   // Only hash the password if it has been modified (or is new)
-  if (!user.isModified('password')) return next();
+  if (!user.isModified("password")) return next();
 
   try {
     // Generate a salt
@@ -51,6 +55,3 @@ UsersSchema.methods.comparePassword = function (candidatePassword) {
 
 const User = mongoose.model("User", UsersSchema);
 module.exports = { User };
-
-
-

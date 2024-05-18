@@ -1,0 +1,4 @@
+find all the users - DONE
+delete a User (id, email) - DONE
+findONe user(id, username) - DONE
+update userEmail (id, email) - DONE

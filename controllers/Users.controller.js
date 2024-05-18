@@ -55,7 +55,7 @@ exports.loginUser = async (req, res) => {
         message: "User not found with the provided email",
       });
     }
-    const passComp = await authenticateUser(password, findUser.password);
+    const passComp = await authenticateUser(password, findUser?.password);
     if (!passComp) {
       return res.status(403).json({
         success: false,
@@ -164,22 +164,6 @@ exports.findAllUsers = async (req, res) => {
     console.log("🚀 ~ exports.findAllUsers= ~ error:", error);
   }
 };
-
-async function createUser(username, password, email) {
-  const newUser = new User({
-    username,
-    password,
-    email,
-  });
-
-  try {
-    const savedUser = await newUser.save();
-    console.log("User created successfully:", savedUser);
-  } catch (err) {
-    console.error("Error creating user:", err);
-  }
-}
-createUser("João", "123456", "joão@gmail.com");
 
 async function authenticateUser(password, hash) {
   try {

@@ -16,7 +16,7 @@ const {
 
 const { AUTH } = require("../utils/valid/index");
 
-router.post("/signup-user", userSignup);
+router.get("/signup-user", userSignup);
 router.post("/login-user", AUTH.isValidUserLogin, loginUser);
 router.post("/update-user", updateUser);
 router.post("/delete-user-by-id", deleteUserById);

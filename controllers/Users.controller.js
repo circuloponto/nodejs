@@ -11,9 +11,10 @@ const bcrypt = require("bcrypt");
 exports.userSignup = async (req, res) => {
   try {
     const data = {
-      username: "nano",
-      email: "email@gmail.com",
-    };
+
+      email: "pedro@gmail.com",
+      password: "123456"
+    }
     const saveuser = await User.create(data);
     if (!saveuser) {
       return res.status(400).json({
@@ -40,9 +41,9 @@ exports.loginUser = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const errorMessage = errors.array()[0].msg;
-      return res.status(STATUS_CODE.UNPROCESSABLE_ENTITY).json({
+      return res.status(403).json({
         success: false,
-        status: STATUS_CODE.UNPROCESSABLE_ENTITY,
+        status: 403,
         message: errorMessage,
       });
     }
@@ -171,13 +172,16 @@ async function authenticateUser(password, hash) {
 
     if (isMatch) {
       console.log("Authentication successful");
+      return isMatch;
     } else {
+      return false;
       console.log("Authentication failed. Wrong password.");
     }
   } catch (err) {
+    return false
     console.error("Error authenticating user:", err);
   }
 }
 
 // Example usage
-authenticateUser("João", "123456");
+//authenticateUser("João", "123456");

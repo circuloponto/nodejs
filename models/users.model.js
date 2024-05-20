@@ -53,5 +53,15 @@ UsersSchema.methods.comparePassword = function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
+
+const photoSchema = new mongoose.Schema({
+  filename: String,
+  contentType: String,
+  metadata: {},
+  uploadDate: { type: Date, default: Date.now }
+});
+
+
 const User = mongoose.model("User", UsersSchema);
-module.exports = { User };
+const Photo = mongoose.model('Photo', photoSchema)
+module.exports = { User, Photo };

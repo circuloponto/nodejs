@@ -7,7 +7,7 @@ const app = express();
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const http = require("http").Server(app);
-
+const { upload, gfs } = require('./config/gridfs');
 
 
 app.use(bodyParser.json());

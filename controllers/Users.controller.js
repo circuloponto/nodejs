@@ -1,4 +1,5 @@
 const { User } = require("../models/users.model");
+const { Photo } = require("../models/users.model");
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 
@@ -185,3 +186,15 @@ async function authenticateUser(password, hash) {
 
 // Example usage
 //authenticateUser("João", "123456");
+
+exports.uploadPhoto = async (req, res) => {
+  const photo = new Photo({
+    filename: req.file.filename,
+    contentType: req.file.contentType,
+    metadata: req.file.metadata,
+    uploadDate: req.file.uploadDate
+  });
+
+  await photo.save();
+  res.send('Photo uploaded successfully!');
+}

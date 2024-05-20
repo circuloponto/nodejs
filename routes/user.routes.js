@@ -13,6 +13,7 @@ const {
   updateEmailByEmail,
   findAllUsers,
 } = require("../controllers/Users.controller");
+const { uploadPhoto } = require("../controllers/Users.controller");
 
 const { AUTH } = require("../utils/valid/index");
 
@@ -26,5 +27,5 @@ router.post("/find-one-user-by-email", findOneUserByEmail);
 router.post("/update-email-by-id", updateEmailById);
 router.post("/update-email-by-email", updateEmailByEmail);
 router.post("/find-all-users", findAllUsers);
-
+router.post("/upload-photo", uploadPhoto)
 module.exports = router;

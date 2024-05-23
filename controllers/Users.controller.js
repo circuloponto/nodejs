@@ -2,6 +2,7 @@ const { User } = require("../models/users.model");
 const { Photo } = require("../models/users.model");
 const { validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
+const path = require("path");
 
 /**
  * User signUP function
@@ -12,10 +13,9 @@ const bcrypt = require("bcrypt");
 exports.userSignup = async (req, res) => {
   try {
     const data = {
-
       email: "pedro@gmail.com",
-      password: "123456"
-    }
+      password: "123456",
+    };
     const saveuser = await User.create(data);
     if (!saveuser) {
       return res.status(400).json({
@@ -104,6 +104,7 @@ exports.deleteUserById = async (req, res) => {
     console.log("🚀 ~ exports.deleteUser= ~ error:", error);
   }
 };
+
 exports.deleteUserByEmail = async (req, res) => {
   try {
     const { email } = req.body;
@@ -113,6 +114,7 @@ exports.deleteUserByEmail = async (req, res) => {
     console.log("🚀 ~ exports.deleteUserByEmail= ~ error:", error);
   }
 };
+
 exports.findOneUserByEmail = async (req, res) => {
   try {
     const { email } = req.body.email;
@@ -122,6 +124,7 @@ exports.findOneUserByEmail = async (req, res) => {
     console.log("🚀 ~ exports.findOneUserByEmail= ~ error:", error);
   }
 };
+
 exports.findOneUserById = async (req, res) => {
   try {
     const { id } = req.body.id;
@@ -131,6 +134,7 @@ exports.findOneUserById = async (req, res) => {
     console.log("🚀 ~ exports.findOneUserByEmail= ~ error:", error);
   }
 };
+
 exports.updateEmailById = async (req, res) => {
   try {
     const { id, email } = req.body;
@@ -144,6 +148,7 @@ exports.updateEmailById = async (req, res) => {
     console.log("🚀 ~ exports.updateEmailById= ~ error:", error);
   }
 };
+
 exports.updateEmailByEmail = async (req, res) => {
   try {
     const { id, email, newEmail, isActive } = req.body;
@@ -157,6 +162,7 @@ exports.updateEmailByEmail = async (req, res) => {
     console.log("🚀 ~ exports.updateEmailById= ~ error:", error);
   }
 };
+
 exports.findAllUsers = async (req, res) => {
   try {
     const users = await User.find();
@@ -179,7 +185,7 @@ async function authenticateUser(password, hash) {
       console.log("Authentication failed. Wrong password.");
     }
   } catch (err) {
-    return false
+    return false;
     console.error("Error authenticating user:", err);
   }
 }
@@ -188,13 +194,24 @@ async function authenticateUser(password, hash) {
 //authenticateUser("João", "123456");
 
 exports.uploadPhoto = async (req, res) => {
-  const photo = new Photo({
-    filename: req.file.filename,
-    contentType: req.file.contentType,
-    metadata: req.file.metadata,
-    uploadDate: req.file.uploadDate
-  });
+  try {
+    const { userId } = req.body;
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+    const file = req.file;
+    let findUser = await User.findOneAndUpdate(
+      { _id: userId },
+      // { $set: { photo: path.join(__dirname, file.path) } },
+      { $set: { photo: file.path } },
+      { new: true }
+    );
 
-  await photo.save();
-  res.send('Photo uploaded successfully!');
-}
+    res.status(200).json({
+      message: "File uploaded successfully",
+      data: findUser,
+    });
+  } catch (error) {
+    console.log("🚀 ~ exports.uploadPhoto= ~ error:", error);
+  }
+};

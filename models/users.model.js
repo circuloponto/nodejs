@@ -16,6 +16,10 @@ const UsersSchema = new Schema(
       type: String,
       default: "",
     },
+    photo: {
+      type: String,
+      default: "",
+    },
     isActive: {
       type: Boolean,
       default: true,
@@ -53,15 +57,13 @@ UsersSchema.methods.comparePassword = function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
-
 const photoSchema = new mongoose.Schema({
   filename: String,
   contentType: String,
   metadata: {},
-  uploadDate: { type: Date, default: Date.now }
+  uploadDate: { type: Date, default: Date.now },
 });
 
-
 const User = mongoose.model("User", UsersSchema);
-const Photo = mongoose.model('Photo', photoSchema)
+const Photo = mongoose.model("Photo", photoSchema);
 module.exports = { User, Photo };

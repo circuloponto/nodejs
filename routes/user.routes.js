@@ -12,12 +12,12 @@ const {
   updateEmailById,
   updateEmailByEmail,
   findAllUsers,
+  uploadPhoto,
 } = require("../controllers/Users.controller");
-const { uploadPhoto } = require("../controllers/Users.controller");
-
+const { upload } = require("../utils/upload");
 const { AUTH } = require("../utils/valid/index");
 
-router.get("/signup-user", userSignup);
+router.post("/signup-user", userSignup);
 router.post("/login-user", AUTH.isValidUserLogin, loginUser);
 router.post("/update-user", updateUser);
 router.post("/delete-user-by-id", deleteUserById);
@@ -27,5 +27,7 @@ router.post("/find-one-user-by-email", findOneUserByEmail);
 router.post("/update-email-by-id", updateEmailById);
 router.post("/update-email-by-email", updateEmailByEmail);
 router.post("/find-all-users", findAllUsers);
-router.post("/upload-photo", uploadPhoto)
+
+router.post("/upload-photo", upload.single("photo"), uploadPhoto); // new route for photo upload
+
 module.exports = router;
